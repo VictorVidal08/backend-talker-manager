@@ -30,11 +30,12 @@ const talkers = async () => {
 
 const addTalker = async (req, res) => {
   const { name, age, talk } = req.body;
-
-  const id = Date.now;
+  const result = await talkers();
+  console.log(result);
+  const lastEl = result[result.length - 1];
 
   const newTalker = {
-    id,
+    id: lastEl.id + 1,
     name,
     age,
     talk,
@@ -43,6 +44,9 @@ const addTalker = async (req, res) => {
   const content = await fs.readFile('./talker.json', { encoding: 'utf8' });
   const data = JSON.parse(content);
   data.push(newTalker);
+  
+  await fs.writeFile('./talker.json', JSON.stringify(data));
+  return res.status(201).json(newTalker);
 };
 
 function generateToken() {
@@ -83,7 +87,13 @@ app.post('/login', emailValidation, passwordValidation, (_req, res) => {
 });
 
 app.post('/talker', 
-  authValidation, nameValidation, ageValidation, talkValidation, rateValidation, (req, res) => {
+  authValidation,
+  nameValidation,
+  ageValidation,
+  talkValidation,
+  rateValidation,
+  addTalker,
+  (req, res) => {
   const { name, age, talk } = req.body;
   const { authorization } = req.headers;
   
