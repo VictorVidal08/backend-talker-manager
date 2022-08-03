@@ -16,12 +16,11 @@ const talkers = async () => {
     // console.log(data);
     return JSON.parse(data);
   } catch (err) {
-    // console.log(err);
     return err;
   }
 };
 
-talkers();
+// talkers();
 
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
@@ -30,11 +29,20 @@ app.get('/', (_request, response) => {
 
 app.get('/talker', async (_req, res) => {
   const talkersResponse = await talkers();
-  // console.log(talkersResponse);
   if (talkersResponse.length === 0) {
     return res.status(HTTP_OK_STATUS).json([]);
   }
   return res.status(HTTP_OK_STATUS).json(talkersResponse);
+});
+
+app.get('/talker/:id', async (req, res) => {
+  const { id } = req.params;
+  const talkersResponse = await talkers();
+  const talkerId = await talkersResponse.find((el) => el.id === Number(id));
+
+  if (!talkerId) return res.status(404).json({ message: 'Pessoa palestrante não encontrada' });
+
+  return res.status(HTTP_OK_STATUS).json(talkerId);
 });
 
 app.listen(PORT, () => {
