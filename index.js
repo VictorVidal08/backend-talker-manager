@@ -2,6 +2,8 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const fs = require('fs/promises');
 const crypto = require('crypto');
+const emailValidation = require('./emailValidation');
+const passwordValidation = require('./passwordvalidation');
 
 const app = express();
 app.use(bodyParser.json());
@@ -10,6 +12,8 @@ const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
 // ref async function: https://nodejs.dev/learn/reading-files-with-nodejs
+
+// var dateReg = /^\d{2}[./-]\d{2}[./-]\d{4}$/ 
 
 const talkers = async () => {
   try {
@@ -52,9 +56,9 @@ app.get('/talker/:id', async (req, res) => {
   return res.status(HTTP_OK_STATUS).json(talkerId);
 });
 
-app.post('/login', (_req, res) => {
-  // const { email, password } = req.body;
+app.post('/login', emailValidation, passwordValidation, (_req, res) => {
   const token = generateToken();
+
   res.status(HTTP_OK_STATUS).json({ token });
 });
 
