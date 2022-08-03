@@ -28,27 +28,6 @@ const talkers = async () => {
   }
 };
 
-const addTalker = async (req, res) => {
-  const { name, age, talk } = req.body;
-  const result = await talkers();
-  console.log(result);
-  const lastEl = result[result.length - 1];
-
-  const newTalker = {
-    id: lastEl.id + 1,
-    name,
-    age,
-    talk,
-  };
-
-  const content = await fs.readFile('./talker.json', { encoding: 'utf8' });
-  const data = JSON.parse(content);
-  data.push(newTalker);
-  
-  await fs.writeFile('./talker.json', JSON.stringify(data));
-  return res.status(201).json(newTalker);
-};
-
 function generateToken() {
   return crypto.randomBytes(8).toString('hex');
 }
@@ -92,14 +71,40 @@ app.post('/talker',
   ageValidation,
   talkValidation,
   rateValidation,
-  addTalker,
-  (req, res) => {
-  const { name, age, talk } = req.body;
-  const { authorization } = req.headers;
+  async (req, res) => {
+    const { name, age, talk } = req.body;
+    const result = await talkers();
+    console.log(result);
+    const lastEl = result[result.length - 1];
   
-  console.log(name, age, talk.watchedAt, talk.rate);
-  console.log(typeof (age));
-  console.log(authorization);
+    const newTalker = {
+      id: lastEl.id + 1,
+      name,
+      age,
+      talk,
+    };
+  
+    const content = await fs.readFile('./talker.json', { encoding: 'utf8' });
+    const data = JSON.parse(content);
+    data.push(newTalker);
+  
+    await fs.writeFile('./talker.json', JSON.stringify(data));
+    return res.status(201).json(newTalker);
+});
+
+app.post('/talker/:id', 
+  authValidation,
+  nameValidation,
+  ageValidation,
+  talkValidation,
+  rateValidation,
+  async (req, res) => {
+  const { id } = req.params;
+  console.log(id);
+
+  const result = await talkers();
+  console.log(result);
+  
   res.send('olá');
 });
 
