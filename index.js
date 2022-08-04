@@ -92,20 +92,28 @@ app.post('/talker',
     return res.status(201).json(newTalker);
 });
 
-app.post('/talker/:id', 
+app.put('/talker/:id', 
   authValidation,
   nameValidation,
   ageValidation,
   talkValidation,
   rateValidation,
   async (req, res) => {
+  const { name, age, talk } = req.body;
   const { id } = req.params;
-  console.log(id);
-
+  // console.log(typeof (id)); vem como string.
+  const numberId = Number(id);
   const result = await talkers();
-  console.log(result);
-  
-  res.send('olá');
+  const removingEl = result.filter((e) => e.id !== numberId);
+  const editTalker = {
+    name,
+    age,
+    id: numberId,
+    talk,
+  };
+  removingEl.push(editTalker);
+  await fs.writeFile('./talker.json', JSON.stringify(removingEl));
+  return res.status(200).json(editTalker);
 });
 
 app.listen(PORT, () => {
