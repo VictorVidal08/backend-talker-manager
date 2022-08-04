@@ -36,8 +36,6 @@ function generateToken() {
 
 module.exports = generateToken;
 
-// talkers();
-
 // não remova esse endpoint, e para o avaliador funcionar
 app.get('/', (_request, response) => {
   response.status(HTTP_OK_STATUS).send();
@@ -49,6 +47,18 @@ app.get('/talker', async (_req, res) => {
     return res.status(HTTP_OK_STATUS).json([]);
   }
   return res.status(HTTP_OK_STATUS).json(talkersResponse);
+});
+
+app.get('/talker/search', 
+authValidation,
+async (req, res) => {
+  const { q } = req.query;
+  console.log(req.query);
+  const result = await talkers();
+  if (!q) return res.status(200).json(result);
+  const filteredNames = result.filter((el) => el.name.includes(q));
+
+  return res.status(200).json(filteredNames);
 });
 
 app.get('/talker/:id', async (req, res) => {
@@ -122,7 +132,6 @@ app.delete('/talker/:id',
   authValidation,
   async (req, res) => {
   const { id } = req.params;
-  // console.log(typeof (id)); vem como string.
   const numberId = Number(id);
   const result = await talkers();
   const removingEl = result.filter((e) => e.id !== numberId);
