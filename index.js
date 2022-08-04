@@ -16,11 +16,13 @@ app.use(bodyParser.json());
 const HTTP_OK_STATUS = 200;
 const PORT = '3000';
 
+const talkerFile = './talker.json';
+
 // ref async function: https://nodejs.dev/learn/reading-files-with-nodejs
 
 const talkers = async () => {
   try {
-    const data = await fs.readFile('./talker.json', { encoding: 'utf8' });
+    const data = await fs.readFile(talkerFile, { encoding: 'utf8' });
     // console.log(data);
     return JSON.parse(data);
   } catch (err) {
@@ -84,11 +86,11 @@ app.post('/talker',
       talk,
     };
   
-    const content = await fs.readFile('./talker.json', { encoding: 'utf8' });
+    const content = await fs.readFile(talkerFile, { encoding: 'utf8' });
     const data = JSON.parse(content);
     data.push(newTalker);
   
-    await fs.writeFile('./talker.json', JSON.stringify(data));
+    await fs.writeFile(talkerFile, JSON.stringify(data));
     return res.status(201).json(newTalker);
 });
 
@@ -112,8 +114,23 @@ app.put('/talker/:id',
     talk,
   };
   removingEl.push(editTalker);
-  await fs.writeFile('./talker.json', JSON.stringify(removingEl));
+  await fs.writeFile(talkerFile, JSON.stringify(removingEl));
   return res.status(200).json(editTalker);
+});
+
+app.delete('/talker/:id', 
+  authValidation,
+  async (req, res) => {
+  const { id } = req.params;
+  // console.log(typeof (id)); vem como string.
+  const numberId = Number(id);
+  const result = await talkers();
+  const removingEl = result.filter((e) => e.id !== numberId);
+
+  console.log(removingEl);
+
+  await fs.writeFile(talkerFile, JSON.stringify(removingEl));
+  return res.status(204).end();
 });
 
 app.listen(PORT, () => {
